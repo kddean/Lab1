@@ -3,8 +3,11 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class MySqlConnector {
@@ -24,8 +27,7 @@ public MySqlConnector() {
 
 		private Connection getConnection() {
 			try {
-				Connection conn = DriverManager
-						.getConnection("jdbc:mysql://localhost/world?" + "user=root&password=cake");
+				Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/world?" + "user=root&password=cake");
 
 				System.out.println("Got Mysql database connection");
 				return conn;
@@ -38,20 +40,24 @@ public MySqlConnector() {
 			return null;
 		}
 		
-		public List<Entry<id, message>> getList()
+		public Map<Integer, String> getList()
 		{
 			PreparedStatement stmt = null;
 			ResultSet rs = null;
 			Connection con = null;
 			try{
-				List<Entry<id, message>message> messages = new ArrayList<id, message>();
+				Map<Integer, String> messages = new HashMap<Integer, String>();
 				
 				con = getConnection();
 				
 				stmt = con.prepareStatement("select * from ToDoList");
 				rs = stmt.executeQuery();
 				while (rs.next()){
-					
+					ToDoItem item = new ToDoItem();
+					item.setid(rs.getInt("id"));
+					item.setMessage(rs.getString("message"));
+					item.setDate(rs.getString("date"));
+					messages.put(item.getid(), item.getMessage());
 				}return messages;
 			} catch (SQLException ex){
 				System.out.println("SQLException: " + ex.getMessage());
@@ -189,6 +195,7 @@ public MySqlConnector() {
 				con = getConnection();
 				
 				stmt = con.prepareStatement("update ToDoList set message = m where id = givenid");
+				stmt.executeUpdate();
 			} catch (SQLException ex){
 				System.out.println("SQLException: " + ex.getMessage());
 				System.out.println("SQLState: " + ex.getSQLState());
@@ -231,7 +238,8 @@ public MySqlConnector() {
 			try{
 				
 			con = getConnection();
-			stmt = con.prepareStatement("create table ToDoList(id int message varchar(65)");
+			stmt = con.prepareStatement("create table ToDoList(id int not null primary key, message varchar(65), date DateTime)");
+			stmt.executeUpdate();
 		}catch (SQLException ex){
 			System.out.println("SQLException: " + ex.getMessage());
 			System.out.println("SQLState: " + ex.getSQLState());
@@ -270,10 +278,13 @@ public MySqlConnector() {
 			PreparedStatement stmt = null;
 			ResultSet rs = null;
 			Connection con = null;
+			java.util.Date date = new java.util.Date();
 			
 			try{
 				con = getConnection();
-				stmt = con.prepareStatement("insert into ToDoList values(Last_Insert_ID(),?)");
+				stmt = con.prepareStatement("insert into ToDoList (message, date) values(?,?)");
+				stmt.setString(1, m);
+				stmt.setTimestamp(2, new Timestamp(date.getTime()));
 				stmt.executeUpdate();
 			}catch (SQLException ex) {
 				// handle any errors
@@ -314,5 +325,6 @@ public MySqlConnector() {
 
 			}
 		}
+		
 }
 		

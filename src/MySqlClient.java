@@ -1,3 +1,6 @@
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class MySqlClient {
@@ -14,12 +17,15 @@ public class MySqlClient {
 		MySqlClient client = new MySqlClient();
 		Scanner s = new Scanner(System.in);
 		connector.createTable();
-		System.out.println("What would you like to do? (Insert, Update, List, Delete)");
+		
 		String a = "";
-		a = s.nextLine();
+		
 		String input = "";
 		int input2;
 		
+		while(!a.equals("Exit"))
+		{System.out.println("What would you like to do? (Insert, Update, List, Delete, Exit)");
+		a = s.nextLine();
 		if (a.equals("Insert"))
 		{
 			System.out.println("Please enter a message.");
@@ -34,9 +40,11 @@ public class MySqlClient {
 			input = s.nextLine();
 			connector.post(input2, input);
 		}
-		else if (a == "List")
+		else if (a.equals("List"))
 		{
-			
+			Map<Integer, String> list = new HashMap<Integer, String>();
+			list = connector.getList();
+			System.out.println(list);
 		}
 		else if (a.equals("Delete"))
 		{
@@ -44,7 +52,12 @@ public class MySqlClient {
 			input2 = s.nextInt();
 			connector.delete(input2);
 		}
+		else if (a.equals("Exit"))
+		{
+			break;
+		}
 		else 
 			System.out.println("That's not an option.");
+		}
 	}	
 }
